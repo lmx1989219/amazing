@@ -14,6 +14,7 @@ import io.netty.handler.codec.string.StringEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -42,6 +43,8 @@ public class NettyServer implements ApplicationContextAware {
 
     @Value("${rpcServer.port:16990}")
     int port;
+    @Autowired
+    SimpleKV simpleKV;
 
     @PostConstruct
     public void start() throws InterruptedException {
@@ -56,7 +59,7 @@ public class NettyServer implements ApplicationContextAware {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
                         socketChannel.pipeline().addLast(new LineBasedFrameDecoder(1024)).addLast("decoder", new StringDecoder())
-                                .addLast("encoder", new StringEncoder(Charset.forName("utf8"))).addLast(new NettyServerHandler());
+                                .addLast("encoder", new StringEncoder(Charset.forName("utf8"))).addLast(new NettyServerHandler(simpleKV));
                     }
                 });
 

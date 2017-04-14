@@ -32,8 +32,14 @@ public class IndexHelper extends BaseMedia {
 
 
     public void recoverIndex() throws Exception {
+        boolean first = true;
         while (buffer.hasRemaining()) {
             int keyLength = buffer.getInt();
+            if (first && keyLength <= 0) {
+                first = false;
+                buffer.rewind();
+                break;
+            }
             if (keyLength <= 0)
                 break;
             byte[] keyBytes = new byte[keyLength];

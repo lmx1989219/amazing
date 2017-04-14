@@ -6,6 +6,11 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
+    SimpleKV sk;
+
+    public NettyServerHandler(SimpleKV simpleKV) {
+        this.sk = simpleKV;
+    }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
@@ -13,13 +18,12 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
         char funcode = msg.charAt(0);
         String req = msg.substring(2);
         if (funcode == 'w') {
-            SimpleKV.write(req);
+            sk.write(req);
             ctx.writeAndFlush("ok");
         } else if (funcode == 'q') {
-            ctx.writeAndFlush(SimpleKV.read(req));
-        }
-        ctx.writeAndFlush("unkown command");
-        //ctx.writeAndFlush(msg.split(",")[0] + ",server 1 say ok");
+            ctx.writeAndFlush(sk.read(req));
+        } else
+            ctx.writeAndFlush("unkown command");
     }
 
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {

@@ -2,17 +2,22 @@ package com.example;
 
 import com.example.search.store.DataMedia;
 import com.example.search.store.IndexHelper;
+import lombok.extern.apachecommons.CommonsLog;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.nio.ByteBuffer;
 
 /**
  * Created by lmx on 2017/4/14.
  */
+@Component
 public class SimpleKV {
-    static DataMedia store;
-    static IndexHelper ih;
+    DataMedia store;
+    IndexHelper ih;
 
-    static {
+    @PostConstruct
+    public void init() {
         try {
             store = new DataMedia("valueData");
             ih = new IndexHelper("keyIndex");
@@ -21,7 +26,7 @@ public class SimpleKV {
         }
     }
 
-    public static void write(String request) {
+    public void write(String request) {
         try {
             ByteBuffer b = ByteBuffer.allocateDirect(128);
             int length = request.getBytes().length;
@@ -34,7 +39,7 @@ public class SimpleKV {
         }
     }
 
-    public static String read(String request) {
+    public String read(String request) {
         try {
             String resp = new String(store.get(ih.getKv().get(request)), "utf8");
             System.out.println(resp);

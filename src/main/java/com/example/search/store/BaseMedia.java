@@ -14,7 +14,7 @@ import java.security.PrivilegedAction;
  */
 public class BaseMedia {
     MappedByteBuffer buffer;
-    int size = 1024 * 1024 * 5;
+    int size = 1024 * 1024 * 50;
     FileChannel fileChannel;
     static File file;
     File f;

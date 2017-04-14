@@ -53,17 +53,18 @@ public class DataMedia extends BaseMedia {
     public static void main(String args[]) {
         try {
             DataMedia store = new DataMedia("user");
-            IndexHelper ih = new IndexHelper("keyIndex");
-            for (int i = 0; i < 1000 * 100; ++i) {
-                ByteBuffer b = ByteBuffer.allocateDirect(128);
-                String req = i + " house" + splitter + "上海虹桥机场T1航站楼，有很多乘客在打酱油";
-                int length = req.getBytes().length;
-                b.putInt(length);
-                b.put(req.getBytes("utf8"));
-                b.flip();
-                DataHelper dh = store.add(b);
-                ih.add(dh);
-            }
+            IndexHelper ih = new IndexHelper("userKeyIndex");
+//            for (int i = 0; i < 1 * 100; ++i) {
+//                ByteBuffer b = ByteBuffer.allocateDirect(128);
+//                String req = i + " house" + splitter + "上海虹桥机场T1航站楼，有很多乘客在打酱油";
+//                int length = req.getBytes().length;
+//                b.putInt(length);
+//                b.put(req.getBytes("utf8"));
+//                b.flip();
+//                DataHelper dh = store.add(b);
+//                ih.add(dh);
+//            }
+            ih.recoverIndex();
             for (Map.Entry<String, DataMedia.DataHelper> e : ih.kv.entrySet()) {
                 System.out.println(e.getKey() + "" + e.getValue() + "\n data=" + new String(store.get(e.getValue()), "utf8"));
             }
