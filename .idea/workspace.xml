@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fa9ebb2d-ec7d-4a6b-83b7-92f7efe73294" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/example/SimpleKV.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/example/DemoApplication$1.class" afterPath="$PROJECT_DIR$/target/classes/com/example/DemoApplication$1.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/example/DemoApplication.class" afterPath="$PROJECT_DIR$/target/classes/com/example/DemoApplication.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/example/NettyServer$1.class" afterPath="$PROJECT_DIR$/target/classes/com/example/NettyServer$1.class" />
@@ -12,15 +11,7 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/example/search/store/DataMedia.class" afterPath="$PROJECT_DIR$/target/classes/com/example/search/store/DataMedia.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/example/search/store/IndexHelper.class" afterPath="$PROJECT_DIR$/target/classes/com/example/search/store/IndexHelper.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/test-classes/com/example/SimpleClient.class" afterPath="$PROJECT_DIR$/target/test-classes/com/example/SimpleClient.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/compiler.xml" afterPath="$PROJECT_DIR$/.idea/compiler.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/example/DemoApplication.java" afterPath="$PROJECT_DIR$/src/main/java/com/example/DemoApplication.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/example/NettyServer.java" afterPath="$PROJECT_DIR$/src/main/java/com/example/NettyServer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/example/NettyServerHandler.java" afterPath="$PROJECT_DIR$/src/main/java/com/example/NettyServerHandler.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/example/search/store/BaseMedia.java" afterPath="$PROJECT_DIR$/src/main/java/com/example/search/store/BaseMedia.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/example/search/store/DataMedia.java" afterPath="$PROJECT_DIR$/src/main/java/com/example/search/store/DataMedia.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/example/search/store/IndexHelper.java" afterPath="$PROJECT_DIR$/src/main/java/com/example/search/store/IndexHelper.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/com/example/SimpleClient.java" afterPath="$PROJECT_DIR$/src/test/java/com/example/SimpleClient.java" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -905,12 +896,20 @@
       <workItem from="1491812633598" duration="8127000" />
       <workItem from="1491894081805" duration="2601000" />
       <workItem from="1492075795863" duration="3902000" />
-      <workItem from="1492079872055" duration="25016000" />
+      <workItem from="1492079872055" duration="25037000" />
     </task>
+    <task id="LOCAL-00001" summary="simulate redis">
+      <created>1492167296538</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1492167296538</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="39646000" />
+    <option name="totallyTimeSpent" value="39667000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -962,6 +961,10 @@
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="simulate redis" />
+    <option name="LAST_COMMIT_MESSAGE" value="simulate redis" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
