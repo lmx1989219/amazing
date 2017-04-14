@@ -35,7 +35,7 @@ public class NettyServer implements ApplicationContextAware {
     @Value("${rpcServer.host:0.0.0.0}")
     String host;
 
-    @Value("${rpcServer.ioThreadNum:5}")
+    @Value("${rpcServer.ioThreadNum:4}")
     int ioThreadNum;
 
     @Value("${rpcServer.backlog:1024}")

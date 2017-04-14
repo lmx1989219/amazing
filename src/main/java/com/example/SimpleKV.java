@@ -2,6 +2,7 @@ package com.example;
 
 import com.example.search.store.DataMedia;
 import com.example.search.store.IndexHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import java.nio.ByteBuffer;
  * Created by lmx on 2017/4/14.
  */
 @Component
+@Slf4j
 public class SimpleKV {
     DataMedia store;
     IndexHelper ih;
@@ -31,7 +33,7 @@ public class SimpleKV {
         }
     }
 
-    public void write(String request) {
+    public synchronized void write(String request) {
         try {
             ByteBuffer b = ByteBuffer.allocateDirect(128);
             int length = request.getBytes().length;
@@ -47,7 +49,7 @@ public class SimpleKV {
     public String read(String request) {
         try {
             String resp = new String(store.get(ih.getKv().get(request)), "utf8");
-            System.out.println(resp);
+            log.info("key={},value={}",request,resp);
             return resp;
         } catch (Exception e) {
         }
