@@ -1,5 +1,7 @@
 package com.example.search.store;
 
+import lombok.Data;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -7,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 索引存储区
  * Created by lmx on 2017/4/14.
  */
+@Data
 public class IndexHelper extends BaseMedia {
     Map<String, DataMedia.DataHelper> kv = new ConcurrentHashMap<>();
 

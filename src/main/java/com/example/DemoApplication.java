@@ -1,5 +1,7 @@
 package com.example;
 
+import com.example.search.store.DataMedia;
+import com.example.search.store.IndexHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,13 +22,14 @@ import javax.jms.Session;
 import java.io.File;
 
 @SpringBootApplication
-@EnableJms
+//@EnableJms
 public class DemoApplication {
 
     @Autowired
     Environment env;
 
-    @Bean // Strictly speaking this bean is not necessary as boot creates a default
+    @Bean
+        // Strictly speaking this bean is not necessary as boot creates a default
     JmsListenerContainerFactory<?> myJmsContainerFactory(ConnectionFactory connectionFactory) {
         SimpleJmsListenerContainerFactory factory = new SimpleJmsListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
@@ -51,8 +54,7 @@ public class DemoApplication {
         while (true) {
             try {
                 Thread.sleep(Long.MAX_VALUE);
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             jmsTemplate.send("mailbox-destination", messageCreator);

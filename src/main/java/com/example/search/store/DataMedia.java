@@ -28,13 +28,15 @@ public class DataMedia extends BaseMedia {
         byte[] re = new byte[k];
         b.get(re);
         String s = new String(re, "utf8");
-        b.rewind();
-        buffer.put(b);
+        String k_ = s.split(splitter)[0];
+        String v = s.split(splitter)[1];
+        byte[] v_ = v.getBytes("utf8");
+        buffer.putInt(v_.length);
+        buffer.put(v_);
         DataHelper dh = new DataHelper();
-        String str = s.split(splitter)[0];
-        dh.key = str;
+        dh.key = k_;
         dh.pos = pos + 4;
-        dh.length = re.length;
+        dh.length = v_.length;
         return dh;
     }
 

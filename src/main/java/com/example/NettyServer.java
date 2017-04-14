@@ -8,6 +8,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import org.slf4j.Logger;
@@ -54,7 +55,7 @@ public class NettyServer implements ApplicationContextAware {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
-                        socketChannel.pipeline().addLast("decoder", new StringDecoder())
+                        socketChannel.pipeline().addLast(new LineBasedFrameDecoder(1024)).addLast("decoder", new StringDecoder())
                                 .addLast("encoder", new StringEncoder(Charset.forName("utf8"))).addLast(new NettyServerHandler());
                     }
                 });
