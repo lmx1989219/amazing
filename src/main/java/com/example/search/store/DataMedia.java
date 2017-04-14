@@ -3,7 +3,6 @@ package com.example.search.store;
 import lombok.Data;
 
 import java.nio.ByteBuffer;
-import java.util.Map;
 
 /**
  * 数据存储区
@@ -11,8 +10,8 @@ import java.util.Map;
  */
 public class DataMedia extends BaseMedia {
 
-    public DataMedia(String fileName) throws Exception {
-        super(fileName);
+    public DataMedia(String fileName, int size) throws Exception {
+        super(fileName, size);
     }
 
     @Data
@@ -50,21 +49,21 @@ public class DataMedia extends BaseMedia {
 
     static String splitter = ":";
 
-    public static void main(String args[]) {
+    /*public static void main(String args[]) {
         try {
             DataMedia store = new DataMedia("user");
             IndexHelper ih = new IndexHelper("userKeyIndex");
-//            for (int i = 0; i < 1 * 100; ++i) {
-//                ByteBuffer b = ByteBuffer.allocateDirect(128);
-//                String req = i + " house" + splitter + "上海虹桥机场T1航站楼，有很多乘客在打酱油";
-//                int length = req.getBytes().length;
-//                b.putInt(length);
-//                b.put(req.getBytes("utf8"));
-//                b.flip();
-//                DataHelper dh = store.add(b);
-//                ih.add(dh);
-//            }
             ih.recoverIndex();
+            for (int i = 0; i < 1 * 100; ++i) {
+                ByteBuffer b = ByteBuffer.allocateDirect(128);
+                String req = i + " house" + splitter + "上海虹桥机场T1航站楼，有很多乘客在打酱油";
+                int length = req.getBytes().length;
+                b.putInt(length);
+                b.put(req.getBytes("utf8"));
+                b.flip();
+                DataHelper dh = store.add(b);
+                ih.add(dh);
+            }
             for (Map.Entry<String, DataMedia.DataHelper> e : ih.kv.entrySet()) {
                 System.out.println(e.getKey() + "" + e.getValue() + "\n data=" + new String(store.get(e.getValue()), "utf8"));
             }
@@ -72,6 +71,6 @@ public class DataMedia extends BaseMedia {
             e.printStackTrace();
         }
 
-    }
+    }*/
 
 }

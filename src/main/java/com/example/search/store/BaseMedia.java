@@ -14,7 +14,7 @@ import java.security.PrivilegedAction;
  */
 public class BaseMedia {
     MappedByteBuffer buffer;
-    int size = 1024 * 1024 * 50;
+    int size = 1024 * 1024;
     FileChannel fileChannel;
     static File file;
     File f;
@@ -29,12 +29,12 @@ public class BaseMedia {
     public BaseMedia() {
     }
 
-    public BaseMedia(String fileName) throws Exception {
+    public BaseMedia(String fileName, int memSize) throws Exception {
         f = new File(file.getAbsolutePath() + File.separator + fileName);
         if (!f.exists())
             f.createNewFile();
         fileChannel = new RandomAccessFile(f, "rw").getChannel();
-        buffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, size);
+        buffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, memSize * size);
     }
 
     public void clean() throws Exception {

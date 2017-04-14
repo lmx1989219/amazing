@@ -13,8 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class IndexHelper extends BaseMedia {
     Map<String, DataMedia.DataHelper> kv = new ConcurrentHashMap<>();
 
-    public IndexHelper(String fileName) throws Exception {
-        super(fileName);
+    public IndexHelper(String fileName, int size) throws Exception {
+        super(fileName, size);
     }
 
 
@@ -54,7 +54,7 @@ public class IndexHelper extends BaseMedia {
             kv.put(key, dh);
         }
     }
-
+/*
     public static void main(String args[]) {
         try {
             IndexHelper ih = new IndexHelper("keyIndex");
@@ -69,5 +69,5 @@ public class IndexHelper extends BaseMedia {
             e.printStackTrace();
         }
 
-    }
+    }*/
 }
