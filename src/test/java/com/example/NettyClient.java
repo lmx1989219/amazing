@@ -61,10 +61,11 @@ public class NettyClient {
                         waiters.put(s, sf);
                         long start = System.currentTimeMillis();
                         try {
+                            //格式：w|seq|key:value
 //                            ch.writeAndFlush("w|" + s + "|user" + s + ":张三\n");
 //                            System.out.println(
 //                                    "resp=" + sf.get() + " cost=" + (System.currentTimeMillis() - start) + "ms");
-
+                            //格式：q|seq|key
                             ch.writeAndFlush("q|" + s + "|user" + s + "\n");
                             System.out.println(
                                     "resp = " + sf.get() + " cost=" + (System.currentTimeMillis() - start) + "ms");
