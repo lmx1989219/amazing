@@ -1,6 +1,7 @@
 package com.example.search.store;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by lmx on 2017/4/14.
  */
 @Data
+@Slf4j
 public class IndexHelper extends BaseMedia {
     Map<String, DataMedia.DataHelper> kv = new ConcurrentHashMap<>();
 
@@ -53,6 +55,7 @@ public class IndexHelper extends BaseMedia {
             dh.length = dataLength;
             kv.put(key, dh);
         }
+        log.info("recover data index size: {}", kv.size());
     }
 /*
     public static void main(String args[]) {

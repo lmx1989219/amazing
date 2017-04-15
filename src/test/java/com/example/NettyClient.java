@@ -22,102 +22,107 @@ import java.util.concurrent.atomic.AtomicLong;
  * @see
  */
 public class NettyClient {
-	public static void main(String[] args) {
-		EventLoopGroup workerGroup = new NioEventLoopGroup(1);
-		Bootstrap client = new Bootstrap();
-		client.group(workerGroup).channel(NioSocketChannel.class).handler(new ChannelInitializer<SocketChannel>() {
-			@Override
-			protected void initChannel(SocketChannel socketChannel) throws Exception {
-				socketChannel.pipeline().addLast(new LineBasedFrameDecoder(1024))
-						.addLast("decoder", new StringDecoder())
-						.addLast("encoder", new StringEncoder(Charset.forName("utf8")))
-						.addLast(new ChannelInboundHandlerAdapter() {
-					@Override
-					public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-						String re = (String) msg;
-						String[] r_ = re.split("=");
-						Long seq = Long.parseLong(r_[1]);
-						waiters.get(seq).setResp(seq + "--->" + r_[0]);
-						waiters.remove(seq);
-					}
+    public static void main(String[] args) {
+        EventLoopGroup workerGroup = new NioEventLoopGroup(8);
+        Bootstrap client = new Bootstrap();
+        client.group(workerGroup).channel(NioSocketChannel.class).handler(new ChannelInitializer<SocketChannel>() {
+            @Override
+            protected void initChannel(SocketChannel socketChannel) throws Exception {
+                socketChannel.pipeline().addLast(new LineBasedFrameDecoder(1024))
+                        .addLast("decoder", new StringDecoder())
+                        .addLast("encoder", new StringEncoder(Charset.forName("utf8")))
+                        .addLast(new ChannelInboundHandlerAdapter() {
+                            @Override
+                            public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+                                String re = (String) msg;
+                                System.out.println(msg);
+                                String[] r_ = re.split("\\|");
+                                Long seq = Long.parseLong(r_[0]);
+                                waiters.get(seq).setResp(seq + "--->" + r_[1]);
+                                waiters.remove(seq);
+                            }
 
-					public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-						cause.printStackTrace();
-						ctx.close();
-					}
-				});
-			}
-		});
-		try {
-			ExecutorService es = Executors.newFixedThreadPool(4);
-			final AtomicLong seq = new AtomicLong(1);
-			final Channel ch = client.connect("0.0.0.0", 16980).sync().channel();
-			for (int i = 0; i < 100; ++i) {
-				es.submit(new Runnable() {
-					public void run() {
-						long s = seq.getAndIncrement();
-						SyncFuture sf = new SyncFuture();
-						waiters.put(s, sf);
-						long start = System.currentTimeMillis();
-						ch.writeAndFlush("q|user" + s + "\n");
-						try {
-							System.out.println(
-									"resp=" + sf.get() + " cost=" + (System.currentTimeMillis() - start) + "ms");
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						} catch (ExecutionException e) {
-							e.printStackTrace();
-						}
-					}
-				});
-			}
-			es.shutdown();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-		}
-	}
+                            public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+                                cause.printStackTrace();
+                                ctx.close();
+                            }
+                        });
+            }
+        });
+        try {
+            ExecutorService es = Executors.newFixedThreadPool(4);
+            final AtomicLong seq = new AtomicLong(1);
+            final Channel ch = client.connect("0.0.0.0", 16980).sync().channel();
+            for (int i = 0; i < 100; ++i) {
+                es.submit(new Runnable() {
+                    public void run() {
+                        long s = seq.getAndIncrement();
+                        SyncFuture sf = new SyncFuture();
+                        waiters.put(s, sf);
+                        long start = System.currentTimeMillis();
+                        try {
+//                            ch.writeAndFlush("w|" + s + "|user" + s + ":张三\n");
+//                            System.out.println(
+//                                    "resp=" + sf.get() + " cost=" + (System.currentTimeMillis() - start) + "ms");
 
-	static Map<Long, SyncFuture> waiters = new ConcurrentHashMap<>();
+                            ch.writeAndFlush("q|" + s + "|user" + s + "\n");
+                            System.out.println(
+                                    "resp = " + sf.get() + " cost=" + (System.currentTimeMillis() - start) + "ms");
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+            es.shutdown();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+        }
+    }
 
-	static class SyncFuture implements java.util.concurrent.Future<String> {
-		CountDownLatch cd = new CountDownLatch(1);
-		String resp;
-		long seq;
+    static Map<Long, SyncFuture> waiters = new ConcurrentHashMap<>();
 
-		public void setResp(String resp) {
-			this.resp = resp;
-			cd.countDown();
-		}
+    static class SyncFuture implements java.util.concurrent.Future<String> {
+        CountDownLatch cd = new CountDownLatch(1);
+        String resp;
+        long seq;
 
-		@Override
-		public boolean cancel(boolean mayInterruptIfRunning) {
-			return false;
-		}
+        public void setResp(String resp) {
+            this.resp = resp;
+            cd.countDown();
+        }
 
-		@Override
-		public boolean isCancelled() {
-			return false;
-		}
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return false;
+        }
 
-		@Override
-		public boolean isDone() {
-			return false;
-		}
+        @Override
+        public boolean isCancelled() {
+            return false;
+        }
 
-		@Override
-		public String get() throws InterruptedException, ExecutionException {
-			cd.await();
-			return this.resp;
-		}
+        @Override
+        public boolean isDone() {
+            return false;
+        }
 
-		@Override
-		public String get(long timeout, TimeUnit unit)
-				throws InterruptedException, ExecutionException, TimeoutException {
-			if (cd.await(timeout, unit))
-				return this.resp;
-			else
-				return null;
-		}
-	}
+        @Override
+        public String get() throws InterruptedException, ExecutionException {
+            cd.await();
+            return this.resp;
+        }
+
+        @Override
+        public String get(long timeout, TimeUnit unit)
+                throws InterruptedException, ExecutionException, TimeoutException {
+            if (cd.await(timeout, unit))
+                return this.resp;
+            else
+                return null;
+        }
+    }
 }

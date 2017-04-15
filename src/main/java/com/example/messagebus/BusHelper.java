@@ -46,9 +46,9 @@ public class BusHelper {
                         String k = channel.getKey();
                         if ((me.getTopic()).equals(k.split("#")[2])) {
                             log.info("notify channel {}", channel.getValue().toString());
-                            channel.getValue().writeAndFlush(me.toString());
+                            channel.getValue().writeAndFlush(me.toString()+"\n");
                         } else {
-                            log.info("no found subscriber");
+                            log.info("not found subscriber");
                         }
                     }
                 } catch (Exception e) {

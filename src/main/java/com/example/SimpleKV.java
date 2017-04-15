@@ -3,7 +3,6 @@ package com.example;
 import com.example.search.store.DataMedia;
 import com.example.search.store.IndexHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +29,7 @@ public class SimpleKV {
             ih = new IndexHelper("keyIndex", storeSize / 8);
             ih.recoverIndex();
         } catch (Exception e) {
+            log.error("init store file error", e);
         }
     }
 
@@ -43,6 +43,7 @@ public class SimpleKV {
             DataMedia.DataHelper dh = store.add(b);
             ih.add(dh);
         } catch (Exception e) {
+            log.error("write data error", e);
         }
     }
 
@@ -53,6 +54,7 @@ public class SimpleKV {
             log.info("key={},value={} cost={}ms", request, resp, (System.currentTimeMillis() - start));
             return resp;
         } catch (Exception e) {
+            log.error("read data error", e);
         }
         return null;
     }
