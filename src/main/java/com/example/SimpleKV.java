@@ -48,8 +48,9 @@ public class SimpleKV {
 
     public String read(String request) {
         try {
+            long start = System.currentTimeMillis();
             String resp = new String(store.get(ih.getKv().get(request)), "utf8");
-            log.info("key={},value={}",request,resp);
+            log.info("key={},value={} cost={}ms", request, resp, (System.currentTimeMillis() - start));
             return resp;
         } catch (Exception e) {
         }

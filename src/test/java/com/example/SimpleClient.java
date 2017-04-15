@@ -15,13 +15,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * read format [w|key]
  */
 public class SimpleClient {
-    static int cucurrencyNum = 32;
+    static int cucurrencyNum = 20;
     static BlockingQueue<Socket> pools = new ArrayBlockingQueue<Socket>(cucurrencyNum);
 
     static {
         for (int i = 0; i < cucurrencyNum; ++i) {
             try {
-                pools.add(new Socket("47.88.35.216", 16980));
+                pools.add(new Socket("127.0.0.1", 16980));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -75,7 +75,7 @@ public class SimpleClient {
                         byte[] dest = new byte[len];
                         System.arraycopy(resp, 0, dest, 0, len);
                         System.out.println(new String(dest));
-                        pools.add(s);
+                        //pools.offer(s);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

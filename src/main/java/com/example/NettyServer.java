@@ -1,5 +1,6 @@
 package com.example;
 
+import com.example.messagebus.BusHelper;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -45,6 +46,8 @@ public class NettyServer implements ApplicationContextAware {
     int port;
     @Autowired
     SimpleKV simpleKV;
+    @Autowired
+    BusHelper busHelper;
 
     @PostConstruct
     public void start() throws InterruptedException {
@@ -59,7 +62,7 @@ public class NettyServer implements ApplicationContextAware {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
                         socketChannel.pipeline().addLast(new LineBasedFrameDecoder(1024)).addLast("decoder", new StringDecoder())
-                                .addLast("encoder", new StringEncoder(Charset.forName("utf8"))).addLast(new NettyServerHandler(simpleKV));
+                                .addLast("encoder", new StringEncoder(Charset.forName("utf8"))).addLast(new NettyServerHandler(simpleKV, busHelper));
                     }
                 });
 
