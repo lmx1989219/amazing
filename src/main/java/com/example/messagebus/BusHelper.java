@@ -1,7 +1,10 @@
 package com.example.messagebus;
 
 import io.netty.channel.ChannelHandlerContext;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +24,9 @@ public class BusHelper {
     BlockingQueue<Message> messages = new LinkedBlockingQueue<>();
 
     @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     static public class Message {
         String topic, msg;
     }
@@ -46,7 +52,7 @@ public class BusHelper {
                         String k = channel.getKey();
                         if ((me.getTopic()).equals(k.split("#")[2])) {
                             log.info("notify channel {}", channel.getValue().toString());
-                            channel.getValue().writeAndFlush(me.toString()+"\n");
+                            channel.getValue().writeAndFlush("broadcast:" + me.toString() + "\n");
                         } else {
                             log.info("not found subscriber");
                         }
