@@ -17,8 +17,8 @@ public class RedisTests {
 
     @Test
     public void testSDK() throws Exception {
-        //template.opsForValue().set("a", "b");
-        System.out.println("k=a,v="+template.opsForValue().get("a"));
+        template.opsForValue().set("aa", "b");
+        System.out.println("k=aa,v="+template.opsForValue().get("aa"));
     }
 
 }

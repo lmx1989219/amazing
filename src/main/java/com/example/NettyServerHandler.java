@@ -14,7 +14,6 @@ import java.util.concurrent.Executors;
 public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
     SimpleKV sk;
     BusHelper busHelper;
-    ExecutorService es = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
 
     public NettyServerHandler(SimpleKV simpleKV, BusHelper busHelper) {
         this.sk = simpleKV;
@@ -23,9 +22,6 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     protected void channelRead0(final ChannelHandlerContext ctx, final String msg) throws Exception {
-        es.submit(new Runnable() {
-            @Override
-            public void run() {
                 log.info("recv msg {}", msg);
                 String command = RedisProtocolAdapter.builder(msg);
                 if(command.equals(""))
@@ -68,8 +64,6 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<String> {
                 } else
                 ctx.writeAndFlush("unkown command");*/
             }
-        });
-    }
 
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         ctx.close();
