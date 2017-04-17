@@ -63,7 +63,7 @@ public class NettyServer implements ApplicationContextAware {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
-                        socketChannel.pipeline().addLast(new LineBasedFrameDecoder(1024)).addLast("decoder", new StringDecoder())
+                        socketChannel.pipeline()./*addLast(new LineBasedFrameDecoder(1024)).*/addLast("decoder", new StringDecoder())
                                 .addLast("encoder", new StringEncoder(Charset.forName("utf8"))).addLast(new NettyServerHandler(simpleKV, busHelper));
                     }
                 });

@@ -41,7 +41,16 @@ public class ClientSdk {
     Channel channel;
     AtomicLong seq = new AtomicLong(0);
 
-    //@PostConstruct
+    public ClientSdk() {
+    }
+
+    public ClientSdk(String host, int port) {
+        this.host = host;
+        this.port = port;
+
+    }
+
+    @PostConstruct
     public void init() throws Exception {
         client.group(workerGroup).channel(NioSocketChannel.class).handler(new ChannelInitializer<SocketChannel>() {
             @Override
