@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -26,6 +27,7 @@ import javax.annotation.PreDestroy;
 import java.nio.charset.Charset;
 
 @Component
+@Order(value = 1)
 public class NettyServer implements ApplicationContextAware {
 
     static final Logger logger = LoggerFactory.getLogger(NettyServer.class);

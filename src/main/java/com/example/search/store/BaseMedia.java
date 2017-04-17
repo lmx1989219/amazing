@@ -19,6 +19,8 @@ public class BaseMedia {
     static File file;
     File f;
     static String dir = "data";
+    final static String charSet = "utf8";
+    final static String splitter = ":";
 
     static {
         file = new File(dir);

@@ -1,5 +1,6 @@
 package com.example;
 
+import com.example.search.store.DataHelper;
 import com.example.search.store.DataMedia;
 import com.example.search.store.IndexHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,7 @@ public class SimpleKV {
             b.putInt(length);
             b.put(request.getBytes("utf8"));
             b.flip();
-            DataMedia.DataHelper dh = store.add(b);
+            DataHelper dh = store.add(b);
             ih.add(dh);
         } catch (Exception e) {
             log.error("write data error", e);
@@ -50,7 +51,7 @@ public class SimpleKV {
     public String read(String request) {
         try {
             long start = System.currentTimeMillis();
-            String resp = new String(store.get(ih.getKv().get(request)), "utf8");
+            String resp = new String(store.get(ih.kv.get(request)), "utf8");
             log.info("key={},value={} cost={}ms", request, resp, (System.currentTimeMillis() - start));
             return resp;
         } catch (Exception e) {
