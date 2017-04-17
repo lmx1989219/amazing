@@ -75,7 +75,7 @@ public class DataMedia extends BaseMedia {
 
     static String splitter = ":";
 
-    public static void main(String args[]) {
+    /*public static void main(String args[]) {
         try {
             DataMedia store = new DataMedia("listData", 1);
             IndexHelper ih = new IndexHelper("keyIndex", 1);
@@ -99,6 +99,6 @@ public class DataMedia extends BaseMedia {
             e.printStackTrace();
         }
 
-    }
+    }*/
 
 }
