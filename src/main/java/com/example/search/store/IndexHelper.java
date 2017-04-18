@@ -4,12 +4,14 @@ import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 索引存储区
+ * 格式：头四位放最新值的postion,其次是数据长度和数据内容
  * Created by lmx on 2017/4/14.
  */
 @Slf4j
@@ -17,11 +19,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class IndexHelper extends BaseMedia {
     public static Map<String, DataHelper> kv = new ConcurrentHashMap<>();
     public static Map<String, List<DataHelper>> list = new ConcurrentHashMap<>();
+    public static Map<String, Map<String, DataHelper>> hash = new ConcurrentHashMap<>();
 
     public IndexHelper(String fileName, int size) throws Exception {
         super(fileName, size);
     }
-
 
     public void add(DataHelper dh) throws Exception {
         if (dh == null) return;
@@ -31,16 +33,22 @@ public class IndexHelper extends BaseMedia {
         else
             buffer.position(4);
         String key = dh.key;
-        byte[] keyBytes = key.getBytes("utf8");
+        byte[] keyBytes = key.getBytes(charSet);
         int pos = dh.pos;
         buffer.putInt(keyBytes.length);
         buffer.put(keyBytes);
 
         String type = dh.type;
-        byte[] typeBytes = type.getBytes("utf8");
+        byte[] typeBytes = type.getBytes(charSet);
         buffer.putInt(typeBytes.length);
         buffer.put(typeBytes);
 
+        if (type.equals("hash")) {
+            String h = dh.hash;
+            byte[] hb = h.getBytes(charSet);
+            buffer.putInt(hb.length);
+            buffer.put(hb);
+        }
         buffer.putInt(pos);
         buffer.putInt(dh.length);
 
@@ -55,6 +63,12 @@ public class IndexHelper extends BaseMedia {
                 list.put(key, new ArrayList<DataHelper>());
             }
             list.get(key).add(dh);
+        }
+        if (dh.getType().equals("hash")) {
+            if (!hash.containsKey(dh.getHash())) {
+                hash.put(dh.getHash(), new HashMap<String, DataHelper>());
+            }
+            hash.get(dh.getHash()).put(key, dh);
         }
     }
 
@@ -73,13 +87,19 @@ public class IndexHelper extends BaseMedia {
                 break;
             byte[] keyBytes = new byte[keyLength];
             buffer.get(keyBytes);
-            String key = new String(keyBytes, "utf8");
+            String key = new String(keyBytes, charSet);
 
             int typeLength = buffer.getInt();
             byte[] typeBytes = new byte[typeLength];
             buffer.get(typeBytes);
-            String type = new String(typeBytes, "utf8");
-
+            String type = new String(typeBytes, charSet);
+            String hash_ = null;
+            if (type.equals("hash")) {
+                int hashLength = buffer.getInt();
+                byte[] hashLengthB = new byte[hashLength];
+                buffer.get(hashLengthB);
+                hash_ = new String(hashLengthB, charSet);
+            }
             int dataIndex = buffer.getInt();
             int dataLength = buffer.getInt();
             DataHelper dh = new DataHelper();
@@ -93,6 +113,12 @@ public class IndexHelper extends BaseMedia {
                     list.put(key, new ArrayList<DataHelper>());
                 }
                 list.get(key).add(dh);
+            }
+            if (dh.getType().equals("hash")) {
+                if (!hash.containsKey(hash_)) {
+                    hash.put(hash_, new HashMap<String, DataHelper>());
+                }
+                hash.get(hash_).put(key, dh);
             }
         }
         log.info("recover data index size: {}", kv.size());

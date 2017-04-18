@@ -16,9 +16,14 @@ public class RedisTests {
     RedisTemplate<String, String> template;
 
     @Test
-    public void testSDK() throws Exception {
-        template.opsForValue().set("aa", "b");
-        System.out.println("k=aa,v="+template.opsForValue().get("aa"));
+    public void testR() throws Exception {
+        //template.opsForValue().set("aa", "b");
+        //System.out.println("k=aa,v=" + template.opsForValue().get("aa"));
+        //template.opsForList().leftPush("list", "1");
+        //System.out.println("list=" + template.opsForList().range("list", 0, -1));
+//        template.opsForHash().put("user200", "age", "25");
+//        template.opsForHash().put("user200", "sex", "男");
+        System.out.println("hv="+template.opsForHash().get("user200", "age"));
     }
 
 }

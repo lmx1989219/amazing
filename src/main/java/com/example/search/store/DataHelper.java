@@ -9,6 +9,7 @@ import lombok.Data;
 public class DataHelper {
     String type = "kv";
     String key;
+    String hash;
     int pos;
     int length;
 }
