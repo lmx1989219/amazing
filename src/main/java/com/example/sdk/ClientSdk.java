@@ -41,7 +41,7 @@ public class ClientSdk {
     Channel channel;
     AtomicLong seq = new AtomicLong(0);
 
-    @PostConstruct
+    //@PostConstruct
     public void init() throws Exception {
         client.group(workerGroup).channel(NioSocketChannel.class).handler(new ChannelInitializer<SocketChannel>() {
             @Override
@@ -97,7 +97,7 @@ public class ClientSdk {
         SyncFuture sf = new SyncFuture();
         waiters.put(sequence, sf);
         long start = System.currentTimeMillis();
-        //格式：w|seq|key:value
+        //格式：q|seq|key
         channel.writeAndFlush("q|" + sequence + "| " + k + "\n");
         try {
             String resp = sf.get();
