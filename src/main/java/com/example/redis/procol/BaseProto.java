@@ -9,4 +9,6 @@ public abstract class BaseProto {
     }
 
     OP op;
+    String key;
+    boolean hasArgs = false;
 }
