@@ -1,6 +1,5 @@
 package com.example;
 
-import com.example.sdk.ClientSdk;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +16,15 @@ public class RedisTests {
 
     @Test
     public void testR() throws Exception {
-        //template.opsForValue().set("aa", "b");
-        //System.out.println("k=aa,v=" + template.opsForValue().get("aa"));
-        //template.opsForList().leftPush("list", "1");
-        //System.out.println("list=" + template.opsForList().range("list", 0, -1));
-//        template.opsForHash().put("user200", "age", "25");
-//        template.opsForHash().put("user200", "sex", "男");
-        System.out.println("hv="+template.opsForHash().get("user200", "age"));
+        for (int i = 0; i < 1000; ++i) {
+            //template.opsForValue().set("aa" + i, "b" + i);
+            System.out.println("k=aa" + i + ",v=" + template.opsForValue().get("aa" + i));
+            //template.opsForList().leftPush("list", "1");
+            //System.out.println("list=" + template.opsForList().range("list", 0, -1));
+            //template.opsForHash().put("user200" + i, "age", "25");
+            //template.opsForHash().put("user200" + i, "sex", "男");
+            //System.out.println("hv=" + template.opsForHash().get("user200" + i, "age"));
+        }
     }
 
 }

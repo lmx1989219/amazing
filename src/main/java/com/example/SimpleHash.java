@@ -37,7 +37,7 @@ public class SimpleHash {
         }
     }
 
-    public synchronized void write(String hash, String request) {
+    public void write(String hash, String request) {
         try {
             ByteBuffer b = ByteBuffer.allocateDirect(128);
             int hashL = hash.getBytes().length;

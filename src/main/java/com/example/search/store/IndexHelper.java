@@ -123,20 +123,4 @@ public class IndexHelper extends BaseMedia {
         }
         log.info("recover data index size: {}", kv.size());
     }
-/*
-    public static void main(String args[]) {
-        try {
-            IndexHelper ih = new IndexHelper("keyIndex");
-            DataMedia store = new DataMedia("user");
-            ih.recoverIndex();
-            for (Map.Entry<String, DataHelper> e : ih.kv.entrySet()) {
-                System.out.println(e.getKey() + "" + e.getValue() + "\n data=" + new String(store.get(e.getValue()), "utf8"));
-            }
-//            ih.clean();
-//            store.clean();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }*/
 }

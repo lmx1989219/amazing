@@ -22,10 +22,10 @@ public class DataMedia extends BaseMedia {
         int k = b.getInt();
         byte[] re = new byte[k];
         b.get(re);
-        String s = new String(re, "utf8");
+        String s = new String(re, charSet);
         String k_ = s.split(splitter)[0];
         String v = s.split(splitter)[1];
-        byte[] v_ = v.getBytes("utf8");
+        byte[] v_ = v.getBytes(charSet);
         buffer.putInt(v_.length);
         buffer.put(v_);
         DataHelper dh = new DataHelper();
@@ -48,10 +48,10 @@ public class DataMedia extends BaseMedia {
         int k = b.getInt();
         byte[] re = new byte[k];
         b.get(re);
-        String s = new String(re, "utf8");
+        String s = new String(re, charSet);
         String k_ = s.split(splitter)[0];
         String v = s.split(splitter)[1];
-        byte[] v_ = v.getBytes("utf8");
+        byte[] v_ = v.getBytes(charSet);
         buffer.putInt(v_.length);
         buffer.put(v_);
         DataHelper dh = new DataHelper();
@@ -75,7 +75,7 @@ public class DataMedia extends BaseMedia {
         int hashL = b.getInt();
         byte[] hashK = new byte[hashL];
         b.get(hashK);
-        String hash = new String(hashK, "utf8");
+        String hash = new String(hashK, charSet);
         byte[] hs = hash.getBytes(charSet);
         buffer.putInt(hs.length);
         buffer.put(hs);
@@ -83,10 +83,10 @@ public class DataMedia extends BaseMedia {
         int k = b.getInt();
         byte[] re = new byte[k];
         b.get(re);
-        String s = new String(re, "utf8");
+        String s = new String(re, charSet);
         String k_ = s.split(splitter)[0];
         String v = s.split(splitter)[1];
-        byte[] v_ = v.getBytes("utf8");
+        byte[] v_ = v.getBytes(charSet);
         buffer.putInt(v_.length);
         buffer.put(v_);
         DataHelper dh = new DataHelper();
@@ -109,33 +109,4 @@ public class DataMedia extends BaseMedia {
         buffer.rewind();
         return data;
     }
-
-    static String splitter = ":";
-
-    /*public static void main(String args[]) {
-        try {
-            DataMedia store = new DataMedia("listData", 1);
-            IndexHelper ih = new IndexHelper("listKeyIndex", 1);
-            ih.recoverIndex();
-//            for (int i = 0; i < 5; ++i) {
-//                ByteBuffer b = ByteBuffer.allocateDirect(128);
-//                String req = " house" + splitter + "上海虹桥机场T1航站楼，有很多乘客在打酱油" + i;
-//                int length = req.getBytes().length;
-//                b.putInt(length);
-//                b.put(req.getBytes("utf8"));
-//                b.flip();
-//                DataHelper dh = store.addList(b);
-//                ih.add(dh);
-//            }
-            for (Map.Entry<String, List<DataHelper>> e : ih.list.entrySet()) {
-                for (DataHelper l : e.getValue()) {
-                    System.out.println(e.getKey() + "\n data=" + new String(store.get(l), "utf8"));
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }*/
-
 }

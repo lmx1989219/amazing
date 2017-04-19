@@ -36,7 +36,7 @@ public class SimpleList {
         }
     }
 
-    public synchronized void write(String request) {
+    public void write(String request) {
         try {
             ByteBuffer b = ByteBuffer.allocateDirect(128);
             int length = request.getBytes().length;
