@@ -59,7 +59,7 @@ public class SimpleList {
                 resp.add(store.get(l));
             }
             resp = resp.subList(startIdx, endIdx == -1 ? resp.size() : endIdx);
-            log.info("key={},value={} cost={}ms", request, resp, (System.currentTimeMillis() - start));
+            log.debug("key={},value={} cost={}ms", request, resp, (System.currentTimeMillis() - start));
             return resp;
         } catch (Exception e) {
             log.error("read list data error", e);

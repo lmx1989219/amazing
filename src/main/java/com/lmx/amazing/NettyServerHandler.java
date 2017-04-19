@@ -46,6 +46,7 @@ public class NettyServerHandler extends ChannelInboundMessageHandlerAdapter<Comm
                 @Override
                 public Reply execute(Command command) throws RedisException {
                     Object[] objects = new Object[types.length];
+                    long start = System.currentTimeMillis();
                     try {
                         command.toArguments(objects, types);
                         return (Reply) method.invoke(rs, objects);
@@ -59,6 +60,8 @@ public class NettyServerHandler extends ChannelInboundMessageHandlerAdapter<Comm
                         return new ErrorReply("ERR " + te.getMessage());
                     } catch (Exception e) {
                         return new ErrorReply("ERR " + e.getMessage());
+                    } finally {
+                        log.info("method:{},cost:{}ms", method.getName(), (System.currentTimeMillis() - start));
                     }
                 }
             });

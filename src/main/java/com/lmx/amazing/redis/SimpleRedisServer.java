@@ -2009,7 +2009,7 @@ public class SimpleRedisServer implements RedisServer {
      */
     @Override
     public BulkReply hget(byte[] key0, byte[] field1) throws RedisException {
-        byte[] bytes = _gethash(key0, false).get(field1);
+        byte[] bytes = hash.read(new String(key0), new String(field1));
         if (bytes == null) {
             return NIL_REPLY;
         } else {
@@ -2026,13 +2026,14 @@ public class SimpleRedisServer implements RedisServer {
      */
     @Override
     public MultiBulkReply hgetall(byte[] key0) throws RedisException {
-        BytesKeyObjectMap<byte[]> hash = _gethash(key0, false);
-        int size = hash.size();
-        Reply[] replies = new Reply[size * 2];
-        int i = 0;
-        for (Map.Entry<Object, byte[]> entry : hash.entrySet()) {
-            replies[i++] = new BulkReply(((BytesKey) entry.getKey()).getBytes());
-            replies[i++] = new BulkReply(entry.getValue());
+        byte[][] data = hash.read(new String(key0));
+        int size = data.length;
+        Reply[] replies = new Reply[size];
+        int j = 0, m = 0;
+        for (int i = 0; i < size; ++i) {
+            replies[j++] = new BulkReply(data[m++]);
+            replies[j++] = new BulkReply(data[m++]);
+            i++;
         }
         return new MultiBulkReply(replies);
     }
@@ -2175,9 +2176,8 @@ public class SimpleRedisServer implements RedisServer {
      */
     @Override
     public IntegerReply hset(byte[] key0, byte[] field1, byte[] value2) throws RedisException {
-        BytesKeyObjectMap<byte[]> hash = _gethash(key0, true);
-        Object put = hash.put(field1, value2);
-        return put == null ? integer(1) : integer(0);
+        hash.write(new String(key0), new String(field1) + ":" + new String(value2));
+        return integer(1);
     }
 
     /**

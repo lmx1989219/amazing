@@ -55,15 +55,33 @@ public class SimpleHash {
         }
     }
 
-    public String read(String hash, String field) {
+    public byte[] read(String hash, String field) {
         try {
             List<String> resp = new ArrayList<>();
             long start = System.currentTimeMillis();
             for (Map.Entry<String, DataHelper> e : ih.hash.get(hash).entrySet()) {
                 if (e.getKey().equals(field))
-                    return new String(store.get(e.getValue()), "utf8");
+                    return store.get(e.getValue());
             }
-            log.info("key={},value={} cost={}ms", field, resp, (System.currentTimeMillis() - start));
+            log.debug("key={},value={} cost={}ms", field, resp, (System.currentTimeMillis() - start));
+        } catch (Exception e) {
+            log.error("read list data error", e);
+        }
+        return null;
+    }
+
+    public byte[][] read(String hash) {
+        try {
+            byte[][] data = new byte[ih.hash.get(hash).size() * 2][];
+            List<String> resp = new ArrayList<>();
+            long start = System.currentTimeMillis();
+            int i = 0;
+            for (Map.Entry<String, DataHelper> e : ih.hash.get(hash).entrySet()) {
+                data[i++] = e.getKey().getBytes();
+                data[i++] = store.get(e.getValue());
+            }
+            log.debug("key={},value={} cost={}ms", hash, resp, (System.currentTimeMillis() - start));
+            return data;
         } catch (Exception e) {
             log.error("read list data error", e);
         }

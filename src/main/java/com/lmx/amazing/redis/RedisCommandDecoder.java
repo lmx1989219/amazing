@@ -16,77 +16,81 @@ import static redis.netty4.RedisReplyDecoder.readLong;
  */
 public class RedisCommandDecoder extends ReplayingDecoder<Void> {
 
-  private byte[][] bytes;
-  private int arguments = 0;
+    private byte[][] bytes;
+    private int arguments = 0;
 
-  /**
-   * Create a new unpooled {@link ByteBuf} by default. Sub-classes may override this to offer a more
-   * optimized implementation.
-   */
-  @Override
-  public ByteBuf newInboundBuffer(ChannelHandlerContext ctx) throws Exception {
-    return ctx.alloc().directBuffer();
-  }
-
-  /**
-   * Decode the from one {@link ByteBuf} to an other. This method will be called till either the input
-   * {@link ByteBuf} has nothing to read anymore, till nothing was read from the input {@link ByteBuf} or till
-   * this method returns {@code null}.
-   *
-   * @param ctx the {@link ChannelHandlerContext} which this {@link io.netty.handler.codec.ByteToByteDecoder} belongs to
-   * @param in  the {@link ByteBuf} from which to read data
-   * @param out the {@link MessageBuf} to which decoded messages should be added
-   * @throws Exception is thrown if an error accour
-   */
-  @Override
-  protected void decode(ChannelHandlerContext ctx, ByteBuf in, MessageBuf<Object> out) throws Exception {
-    if (bytes != null) {
-      int numArgs = bytes.length;
-      for (int i = arguments; i < numArgs; i++) {
-        if (in.readByte() == '$') {
-          long l = readLong(in);
-          if (l > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException("Java only supports arrays up to " + Integer.MAX_VALUE + " in size");
-          }
-          int size = (int) l;
-          bytes[i] = new byte[size];
-          in.readBytes(bytes[i]);
-          if (in.bytesBefore(ByteBufIndexFinder.CRLF) != 0) {
-            throw new RedisException("Argument doesn't end in CRLF");
-          }
-          in.skipBytes(2);
-          arguments++;
-          checkpoint();
-        } else {
-          throw new IOException("Unexpected character");
-        }
-      }
-      try {
-        out.add(new Command(bytes));
-      } finally {
-        bytes = null;
-        arguments = 0;
-      }
-    } else if (in.readByte() == '*') {
-      long l = readLong(in);
-      if (l > Integer.MAX_VALUE) {
-        throw new IllegalArgumentException("Java only supports arrays up to " + Integer.MAX_VALUE + " in size");
-      }
-      int numArgs = (int) l;
-      if (numArgs < 0) {
-        throw new RedisException("Invalid size: " + numArgs);
-      }
-      bytes = new byte[numArgs][];
-      checkpoint();
-      decode(ctx, in, out);
-    } else {
-      // Go backwards one
-      in.readerIndex(in.readerIndex() - 1);
-      // Read command -- can't be interupted
-      byte[][] b = new byte[1][];
-      b[0] = in.readBytes(in.bytesBefore(ByteBufIndexFinder.CRLF)).array();
-      in.skipBytes(2);
-      out.add(new Command(b, true));
+    /**
+     * Create a new unpooled {@link ByteBuf} by default. Sub-classes may override this to offer a more
+     * optimized implementation.
+     */
+    @Override
+    public ByteBuf newInboundBuffer(ChannelHandlerContext ctx) throws Exception {
+        return ctx.alloc().directBuffer();
     }
-  }
+
+    /**
+     * Decode the from one {@link ByteBuf} to an other. This method will be called till either the input
+     * {@link ByteBuf} has nothing to read anymore, till nothing was read from the input {@link ByteBuf} or till
+     * this method returns {@code null}.
+     *
+     * @param ctx the {@link ChannelHandlerContext} which this {@link io.netty.handler.codec.ByteToByteDecoder} belongs to
+     * @param in  the {@link ByteBuf} from which to read data
+     * @param out the {@link MessageBuf} to which decoded messages should be added
+     * @throws Exception is thrown if an error accour
+     */
+    @Override
+    protected void decode(ChannelHandlerContext ctx, ByteBuf in, MessageBuf<Object> out) throws Exception {
+        if (bytes != null) {
+            int numArgs = bytes.length;
+            for (int i = arguments; i < numArgs; i++) {
+                if (in.readByte() == '$') {
+                    long l = readLong(in);
+                    if (l > Integer.MAX_VALUE) {
+                        throw new IllegalArgumentException("Java only supports arrays up to " + Integer.MAX_VALUE + " in size");
+                    }
+                    int size = (int) l;
+                    bytes[i] = new byte[size];
+                    in.readBytes(bytes[i]);
+                    if (in.bytesBefore(ByteBufIndexFinder.CRLF) != 0) {
+                        throw new RedisException("Argument doesn't end in CRLF");
+                    }
+                    in.skipBytes(2);
+                    arguments++;
+                    checkpoint();
+                } else {
+                    throw new IOException("Unexpected character");
+                }
+            }
+            try {
+//                String[] strings = new String[bytes.length];
+//                for (int i = 0; i < strings.length; ++i) {
+//                    strings[i] = new String(bytes[i]);
+//                }
+                out.add(new Command(bytes));
+            } finally {
+                bytes = null;
+                arguments = 0;
+            }
+        } else if (in.readByte() == '*') {
+            long l = readLong(in);
+            if (l > Integer.MAX_VALUE) {
+                throw new IllegalArgumentException("Java only supports arrays up to " + Integer.MAX_VALUE + " in size");
+            }
+            int numArgs = (int) l;
+            if (numArgs < 0) {
+                throw new RedisException("Invalid size: " + numArgs);
+            }
+            bytes = new byte[numArgs][];
+            checkpoint();
+            decode(ctx, in, out);
+        } else {
+            // Go backwards one
+            in.readerIndex(in.readerIndex() - 1);
+            // Read command -- can't be interupted
+            byte[][] b = new byte[1][];
+            b[0] = in.readBytes(in.bytesBefore(ByteBufIndexFinder.CRLF)).array();
+            in.skipBytes(2);
+            out.add(new Command(b, true));
+        }
+    }
 }

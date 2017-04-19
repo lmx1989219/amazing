@@ -53,7 +53,7 @@ public class SimpleKV {
             long start = System.currentTimeMillis();
             byte[] data = store.get(ih.kv.get(request));
             String resp = new String(data, "utf8");
-            log.info("key={},value={} cost={}ms", request, resp, (System.currentTimeMillis() - start));
+            log.debug("key={},value={} cost={}ms", request, resp, (System.currentTimeMillis() - start));
             return data;
         } catch (Exception e) {
             log.error("read data error", e);
