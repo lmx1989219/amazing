@@ -1,5 +1,6 @@
-package com.example.messagebus;
+package com.lmx.amazing.messagebus;
 
+import com.lmx.amazing.redis.RedisProtocolAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,7 +24,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Slf4j
 @Component
 public class BusHelper {
-    Map<String, ChannelHandlerContext> subscriber = new ConcurrentHashMap<>();
+    Map<String, List<ChannelHandlerContext>> subscribers = new ConcurrentHashMap<>();
     BlockingQueue<Message> messages = new LinkedBlockingQueue<>();
 
     @Data
@@ -32,8 +36,10 @@ public class BusHelper {
     }
 
     public void regSubscriber(ChannelHandlerContext channel, String topic) {
-        subscriber.put(channel.toString() + "#" + topic
-                , channel);
+        if (!subscribers.containsKey(topic)) {
+            subscribers.put(topic, new ArrayList<ChannelHandlerContext>());
+        }
+        subscribers.get(topic).add(channel);
         log.info("register subscriber {}", channel.channel().toString());
     }
 
@@ -48,14 +54,10 @@ public class BusHelper {
             while (true) {
                 try {
                     Message me = messages.take();
-                    for (Map.Entry<String, ChannelHandlerContext> channel : subscriber.entrySet()) {
-                        String k = channel.getKey();
-                        if ((me.getTopic()).equals(k.split("#")[2])) {
-                            log.info("notify channel {}", channel.getValue().toString());
-                            channel.getValue().writeAndFlush("broadcast:" + me.toString() + "\n");
-                        } else {
-                            log.info("not found subscriber");
-                        }
+                    String topic = me.getTopic();
+                    for (ChannelHandlerContext ch : subscribers.get(topic)) {
+                        log.info("notify channel: {} ,msg: {}", ch.toString(), me.getMsg());
+                        ch.writeAndFlush(RedisProtocolAdapter.builderResp(new ArrayList<>(Arrays.asList(me.getMsg()))));
                     }
                 } catch (Exception e) {
                     log.error("", e);

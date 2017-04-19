@@ -1,4 +1,4 @@
-package com.example.search.store;
+package com.lmx.amazing.search.store;
 
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package com.example.redis.procol;
+package com.lmx.amazing.redis.procol;
 
 /**
  * Created by lmx on 2017/4/18.

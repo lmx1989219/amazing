@@ -1,4 +1,4 @@
-package com.example.redis;
+package com.lmx.amazing.redis;
 
 import java.util.List;
 

@@ -1,8 +1,8 @@
-package com.example;
+package com.lmx.amazing;
 
-import com.example.search.store.DataHelper;
-import com.example.search.store.DataMedia;
-import com.example.search.store.IndexHelper;
+import com.lmx.amazing.search.store.DataHelper;
+import com.lmx.amazing.search.store.DataMedia;
+import com.lmx.amazing.search.store.IndexHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

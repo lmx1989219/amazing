@@ -1,4 +1,4 @@
-package com.example.search.store;
+package com.lmx.amazing.search.store;
 
 import java.io.File;
 import java.io.RandomAccessFile;

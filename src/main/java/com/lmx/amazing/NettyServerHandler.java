@@ -1,7 +1,7 @@
-package com.example;
+package com.lmx.amazing;
 
-import com.example.messagebus.BusHelper;
-import com.example.redis.RedisProtocolAdapter;
+import com.lmx.amazing.messagebus.BusHelper;
+import com.lmx.amazing.redis.RedisProtocolAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
