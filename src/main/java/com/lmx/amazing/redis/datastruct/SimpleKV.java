@@ -1,4 +1,4 @@
-package com.lmx.amazing;
+package com.lmx.amazing.redis.datastruct;
 
 import com.lmx.amazing.search.store.DataHelper;
 import com.lmx.amazing.search.store.DataMedia;
@@ -9,9 +9,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 基于内存读写key value操作,数据可持久,零延迟
@@ -19,7 +16,7 @@ import java.util.Map;
  */
 @Component
 @Slf4j
-public class SimpleHash {
+public class SimpleKV {
     DataMedia store;
     IndexHelper ih;
 
@@ -29,43 +26,37 @@ public class SimpleHash {
     @PostConstruct
     public void init() {
         try {
-            store = new DataMedia("hashData", storeSize);
-            ih = new IndexHelper("hashIndex", storeSize / 8);
+            store = new DataMedia("valueData", storeSize);
+            ih = new IndexHelper("keyIndex", storeSize / 8);
             ih.recoverIndex();
         } catch (Exception e) {
             log.error("init store file error", e);
         }
     }
 
-    public void write(String hash, String request) {
+    public void write(String request) {
         try {
             ByteBuffer b = ByteBuffer.allocateDirect(128);
-            int hashL = hash.getBytes().length;
-            b.putInt(hashL);
-            b.put(hash.getBytes("utf8"));
-
             int length = request.getBytes().length;
             b.putInt(length);
             b.put(request.getBytes("utf8"));
             b.flip();
-            DataHelper dh = store.addHash(b);
+            DataHelper dh = store.add(b);
             ih.add(dh);
         } catch (Exception e) {
-            log.error("write list data error", e);
+            log.error("write data error", e);
         }
     }
 
-    public String read(String hash, String field) {
+    public byte[] read(String request) {
         try {
-            List<String> resp = new ArrayList<>();
             long start = System.currentTimeMillis();
-            for (Map.Entry<String, DataHelper> e : ih.hash.get(hash).entrySet()) {
-                if (e.getKey().equals(field))
-                    return new String(store.get(e.getValue()), "utf8");
-            }
-            log.info("key={},value={} cost={}ms", field, resp, (System.currentTimeMillis() - start));
+            byte[] data = store.get(ih.kv.get(request));
+            String resp = new String(data, "utf8");
+            log.info("key={},value={} cost={}ms", request, resp, (System.currentTimeMillis() - start));
+            return data;
         } catch (Exception e) {
-            log.error("read list data error", e);
+            log.error("read data error", e);
         }
         return null;
     }

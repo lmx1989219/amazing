@@ -1,16 +1,18 @@
 package com.lmx.amazing;
 
 import com.lmx.amazing.messagebus.BusHelper;
+import com.lmx.amazing.redis.RedisCommandDecoder;
+import com.lmx.amazing.redis.RedisReplyEncoder;
+import com.lmx.amazing.redis.RedisServer;
+import com.lmx.amazing.redis.SimpleRedisServer;
+import com.lmx.amazing.redis.datastruct.SimpleHash;
+import com.lmx.amazing.redis.datastruct.SimpleKV;
+import com.lmx.amazing.redis.datastruct.SimpleList;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -23,7 +25,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.nio.charset.Charset;
 
 @Component
 @Order(value = 1)
@@ -59,15 +60,22 @@ public class NettyServer implements ApplicationContextAware {
         logger.info("begin to start rpc server");
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup(ioThreadNum);
-
+        final RedisServer redis = new SimpleRedisServer();
+        final NettyServerHandler commandHandler = new NettyServerHandler(redis);
+        redis.initStore(simpleKV, sl, sh);
         ServerBootstrap serverBootstrap = new ServerBootstrap();
-        serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).option(ChannelOption.SO_BACKLOG, backlog)
-                .childOption(ChannelOption.SO_KEEPALIVE, true).childOption(ChannelOption.TCP_NODELAY, true)
+        serverBootstrap.group(new NioEventLoopGroup(), new NioEventLoopGroup())
+                .channel(NioServerSocketChannel.class)
+                .option(ChannelOption.SO_BACKLOG, 100)
+                .localAddress(port)
+                .childOption(ChannelOption.TCP_NODELAY, true)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
-                    protected void initChannel(SocketChannel socketChannel) throws Exception {
-                        socketChannel.pipeline().addLast("decoder", new StringDecoder())
-                                .addLast("encoder", new StringEncoder(Charset.forName("utf8"))).addLast(new NettyServerHandler(simpleKV, busHelper, sl, sh));
+                    public void initChannel(SocketChannel ch) throws Exception {
+                        ChannelPipeline p = ch.pipeline();
+                        p.addLast(new RedisCommandDecoder());
+                        p.addLast(new RedisReplyEncoder());
+                        p.addLast(commandHandler);
                     }
                 });
 

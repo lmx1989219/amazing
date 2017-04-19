@@ -1,4 +1,4 @@
-package com.lmx.amazing;
+package com.lmx.amazing.redis.datastruct;
 
 import com.lmx.amazing.search.store.DataHelper;
 import com.lmx.amazing.search.store.DataMedia;
@@ -36,7 +36,7 @@ public class SimpleList {
         }
     }
 
-    public void write(String request) {
+    public int write(String request) {
         try {
             ByteBuffer b = ByteBuffer.allocateDirect(128);
             int length = request.getBytes().length;
@@ -44,18 +44,19 @@ public class SimpleList {
             b.put(request.getBytes("utf8"));
             b.flip();
             DataHelper dh = store.addList(b);
-            ih.add(dh);
+            return ih.add(dh);
         } catch (Exception e) {
             log.error("write list data error", e);
         }
+        return -1;
     }
 
-    public List<String> read(String request, int startIdx, int endIdx) {
+    public List<byte[]> read(String request, int startIdx, int endIdx) {
         try {
-            List<String> resp = new ArrayList<>();
+            List<byte[]> resp = new ArrayList<>();
             long start = System.currentTimeMillis();
             for (DataHelper l : ih.list.get(request)) {
-                resp.add(new String(store.get(l), "utf8"));
+                resp.add(store.get(l));
             }
             resp = resp.subList(startIdx, endIdx == -1 ? resp.size() : endIdx);
             log.info("key={},value={} cost={}ms", request, resp, (System.currentTimeMillis() - start));

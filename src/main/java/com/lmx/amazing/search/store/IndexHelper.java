@@ -3,10 +3,7 @@ package com.lmx.amazing.search.store;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -25,8 +22,8 @@ public class IndexHelper extends BaseMedia {
         super(fileName, size);
     }
 
-    public void add(DataHelper dh) throws Exception {
-        if (dh == null) return;
+    public int add(DataHelper dh) throws Exception {
+        if (dh == null) return -1;
         int indexPos = 0;
         if ((indexPos = buffer.getInt()) != 0)
             buffer.position(indexPos);
@@ -60,16 +57,19 @@ public class IndexHelper extends BaseMedia {
         kv.put(key, dh);
         if (dh.getType().equals("list")) {
             if (!list.containsKey(key)) {
-                list.put(key, new ArrayList<DataHelper>());
+                list.put(key, new LinkedList<DataHelper>());
             }
             list.get(key).add(dh);
+            return list.get(key).size();
         }
         if (dh.getType().equals("hash")) {
             if (!hash.containsKey(dh.getHash())) {
                 hash.put(dh.getHash(), new HashMap<String, DataHelper>());
             }
             hash.get(dh.getHash()).put(key, dh);
+            return hash.get(dh.getHash()).size();
         }
+        return 0;
     }
 
 
@@ -110,7 +110,7 @@ public class IndexHelper extends BaseMedia {
             kv.put(key, dh);
             if (dh.getType().equals("list")) {
                 if (!list.containsKey(key)) {
-                    list.put(key, new ArrayList<DataHelper>());
+                    list.put(key, new LinkedList<DataHelper>());
                 }
                 list.get(key).add(dh);
             }

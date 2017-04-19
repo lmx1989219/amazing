@@ -1,6 +1,5 @@
 package com.lmx.amazing.messagebus;
 
-import com.lmx.amazing.redis.RedisProtocolAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import redis.netty4.BulkReply;
+import redis.netty4.MultiBulkReply;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -57,7 +58,8 @@ public class BusHelper {
                     String topic = me.getTopic();
                     for (ChannelHandlerContext ch : subscribers.get(topic)) {
                         log.info("notify channel: {} ,msg: {}", ch.toString(), me.getMsg());
-                        ch.writeAndFlush(RedisProtocolAdapter.builderResp(new ArrayList<>(Arrays.asList(me.getMsg()))));
+                        ch.channel().write(new BulkReply(me.getMsg().getBytes()));
+                        ch.channel().flush();
                     }
                 } catch (Exception e) {
                     log.error("", e);

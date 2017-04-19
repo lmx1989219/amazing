@@ -19,7 +19,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * 性能比拼接近于等价，争取超过redis！fighting！！
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = DemoApplication.class)
+@SpringApplicationConfiguration(classes = MainApplication.class)
 @Slf4j
 public class RedisTests {
 
@@ -28,9 +28,9 @@ public class RedisTests {
 
     @Test
     public void testR() throws Exception {
-        for (int i = 2000; i < 3000 * 10; ++i) {
-            template.opsForValue().set("aa" + i, "b" + i);
-//            log.debug("k=aa" + i + ",v=" + template.opsForValue().get("aa" + i));
+        for (int i = 1000; i < 2000; ++i) {
+//            template.opsForValue().set("aa" + i, "b" + i);
+            log.debug("k=aa" + i + ",v=" + template.opsForValue().get("aa" + i));
 //            template.opsForList().leftPush("list", "1");
 //            log.debug("list=" + template.opsForList().range("list", 0, -1));
 //            template.opsForHash().put("user200" + i, "age", "25");
