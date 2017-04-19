@@ -57,7 +57,7 @@ public class NettyServer implements ApplicationContextAware {
 
     @PostConstruct
     public void start() throws InterruptedException {
-        logger.info("begin to start rpc server");
+        logger.info("begin to start rpc server..");
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup(ioThreadNum);
         final RedisServer redis = new SimpleRedisServer();
