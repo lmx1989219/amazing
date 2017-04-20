@@ -13,6 +13,9 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -62,8 +65,9 @@ public class NettyServer implements ApplicationContextAware {
         workerGroup = new NioEventLoopGroup(ioThreadNum);
         final RedisServer redis = new SimpleRedisServer();
         final NettyServerHandler commandHandler = new NettyServerHandler(redis);
-        redis.initStore(simpleKV, sl, sh);
+        redis.initStore(simpleKV, sl, sh,busHelper);
         ServerBootstrap serverBootstrap = new ServerBootstrap();
+        final DefaultEventExecutorGroup group = new DefaultEventExecutorGroup(1);
         serverBootstrap.group(new NioEventLoopGroup(), new NioEventLoopGroup())
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 100)
@@ -75,27 +79,32 @@ public class NettyServer implements ApplicationContextAware {
                         ChannelPipeline p = ch.pipeline();
                         p.addLast(new RedisCommandDecoder());
                         p.addLast(new RedisReplyEncoder());
-                        p.addLast(commandHandler);
+                        p.addLast(group, commandHandler);
                     }
                 });
-
-        channel = serverBootstrap.bind(host, port).sync().channel();
+        // Start the server.
+        ChannelFuture channel = serverBootstrap.bind(host, port).sync();
+        //Wait until the server socket is closed.
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    channel.channel().closeFuture().sync();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
 
         logger.info("NettyRPC server listening on port {}", port);
     }
 
+
     @PreDestroy
     public void stop() {
         logger.info("destroy server resources");
-        if (null == channel) {
-            logger.error("server channel is null");
-        }
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
-        channel.closeFuture().syncUninterruptibly();
-        bossGroup = null;
-        workerGroup = null;
-        channel = null;
     }
 
     public void setApplicationContext(ApplicationContext ctx) throws BeansException {

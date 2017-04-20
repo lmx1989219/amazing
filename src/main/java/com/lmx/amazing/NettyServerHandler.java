@@ -1,12 +1,11 @@
 package com.lmx.amazing;
 
 import com.google.common.base.Charsets;
-import com.lmx.amazing.messagebus.BusHelper;
 import com.lmx.amazing.redis.RedisException;
 import com.lmx.amazing.redis.RedisServer;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundMessageHandlerAdapter;
+import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
 import redis.netty4.Command;
 import redis.netty4.ErrorReply;
@@ -24,18 +23,12 @@ import static redis.netty4.StatusReply.QUIT;
 
 @Slf4j
 @ChannelHandler.Sharable
-public class NettyServerHandler extends ChannelInboundMessageHandlerAdapter<Command> {
-    BusHelper busHelper;
-
-    public void regPubSub(BusHelper busHelper) {
-        this.busHelper = busHelper;
-    }
-
+public class NettyServerHandler extends SimpleChannelInboundHandler<Command> {
 
     private Map<BytesKey, Wrapper> methods = new HashMap<BytesKey, Wrapper>();
 
     interface Wrapper {
-        Reply execute(Command command) throws RedisException;
+        Reply execute(Command command, ChannelHandlerContext ch) throws RedisException;
     }
 
     public NettyServerHandler(final RedisServer rs) {
@@ -44,11 +37,14 @@ public class NettyServerHandler extends ChannelInboundMessageHandlerAdapter<Comm
             final Class<?>[] types = method.getParameterTypes();
             methods.put(new BytesKey(method.getName().getBytes()), new Wrapper() {
                 @Override
-                public Reply execute(Command command) throws RedisException {
+                public Reply execute(Command command, ChannelHandlerContext ch) throws RedisException {
                     Object[] objects = new Object[types.length];
                     long start = System.currentTimeMillis();
                     try {
                         command.toArguments(objects, types);
+                        if (method.getName().equals("subscribe")) {
+                            objects[objects.length-1] = ch;
+                        }
                         return (Reply) method.invoke(rs, objects);
                     } catch (IllegalAccessException e) {
                         throw new RedisException("Invalid server implementation");
@@ -61,7 +57,7 @@ public class NettyServerHandler extends ChannelInboundMessageHandlerAdapter<Comm
                     } catch (Exception e) {
                         return new ErrorReply("ERR " + e.getMessage());
                     } finally {
-                        log.info("method:{},cost:{}ms", method.getName(), (System.currentTimeMillis() - start));
+                        log.info("method {},cost {}ms", method.getName(), (System.currentTimeMillis() - start));
                     }
                 }
             });
@@ -71,13 +67,14 @@ public class NettyServerHandler extends ChannelInboundMessageHandlerAdapter<Comm
     private static final byte LOWER_DIFF = 'a' - 'A';
 
     @Override
-    public void endMessageReceived(ChannelHandlerContext ctx) throws Exception {
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
         ctx.flush();
     }
 
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, Command msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, Command msg) throws Exception {
         byte[] name = msg.getName();
+
         for (int i = 0; i < name.length; i++) {
             byte b = name[i];
             if (b >= 'A' && b <= 'Z') {
@@ -85,11 +82,11 @@ public class NettyServerHandler extends ChannelInboundMessageHandlerAdapter<Comm
             }
         }
         Wrapper wrapper = methods.get(new BytesKey(name));
-        Reply reply = null;
+        Reply reply;
         if (wrapper == null) {
             reply = new ErrorReply("unknown command '" + new String(name, Charsets.US_ASCII) + "'");
         } else {
-            reply = wrapper.execute(msg);
+            reply = wrapper.execute(msg, ctx);
         }
         if (reply == QUIT) {
             ctx.close();
@@ -104,13 +101,12 @@ public class NettyServerHandler extends ChannelInboundMessageHandlerAdapter<Comm
             if (reply == null) {
                 reply = NYI_REPLY;
             }
-            ctx.nextOutboundMessageBuffer().add(reply);
+            ctx.writeAndFlush(reply);
         }
     }
 
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         log.error("", cause);
-        //ctx.close();
+        ctx.close();
     }
-
 }

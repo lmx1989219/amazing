@@ -1,13 +1,17 @@
 package com.lmx.amazing.redis;
 
+import com.lmx.amazing.messagebus.BusHelper;
 import com.lmx.amazing.redis.datastruct.SimpleHash;
 import com.lmx.amazing.redis.datastruct.SimpleKV;
 import com.lmx.amazing.redis.datastruct.SimpleList;
+import io.netty.channel.ChannelHandlerContext;
 import redis.netty4.*;
 
 public interface RedisServer {
 
-    public void initStore(SimpleKV simpleKV, SimpleList sl, SimpleHash sh);
+    public IntegerReply subscribe(byte[][] channel, ChannelHandlerContext chan);
+
+    public void initStore(SimpleKV simpleKV, SimpleList sl, SimpleHash sh, BusHelper bus);
 
     /**
      * Append a value to a key

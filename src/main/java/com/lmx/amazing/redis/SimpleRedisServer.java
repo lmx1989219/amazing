@@ -5,6 +5,7 @@ import com.lmx.amazing.redis.datastruct.SimpleHash;
 import com.lmx.amazing.redis.datastruct.SimpleKV;
 import com.lmx.amazing.redis.datastruct.SimpleList;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
 import lombok.Data;
 import redis.netty4.*;
 import redis.util.*;
@@ -27,11 +28,18 @@ public class SimpleRedisServer implements RedisServer {
     SimpleKV kv;
     SimpleList list;
     SimpleHash hash;
+    BusHelper bus;
 
-    public void initStore(SimpleKV simpleKV, SimpleList sl, SimpleHash sh) {
+    public IntegerReply subscribe(byte[][] channel, ChannelHandlerContext chan) {
+        bus.regSubscriber(chan, channel);
+        return integer(1);
+    }
+
+    public void initStore(SimpleKV simpleKV, SimpleList sl, SimpleHash sh, BusHelper bus) {
         this.kv = simpleKV;
         this.list = sl;
         this.hash = sh;
+        this.bus = bus;
     }
 
     private static final StatusReply PONG = new StatusReply("PONG");
@@ -282,7 +290,8 @@ public class SimpleRedisServer implements RedisServer {
         try {
             tableField = HashMap.class.getDeclaredField("table");
             tableField.setAccessible(true);
-            nextField = Class.forName("java.util.HashMap$Entry").getDeclaredField("next");
+//            nextField = Class.forName("java.util.HashMap$Entry").getDeclaredField("next");
+            nextField = Class.forName("java.util.LinkedHashMap$Entry").getDeclaredField("after");
             nextField.setAccessible(true);
             mapField = HashSet.class.getDeclaredField("map");
             mapField.setAccessible(true);
@@ -2230,8 +2239,8 @@ public class SimpleRedisServer implements RedisServer {
      */
     @Override
     public IntegerReply publish(byte[] channel0, byte[] message1) throws RedisException {
-        // TODO: Pubsub
-        return null;
+        bus.pubMsg(new BusHelper.Message().builder().msg(message1).topic(channel0).build());
+        return integer(1);
     }
 
     /**

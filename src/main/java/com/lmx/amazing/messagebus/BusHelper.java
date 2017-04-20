@@ -8,11 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import redis.netty4.BulkReply;
-import redis.netty4.MultiBulkReply;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -20,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
+ * 基于topic路由
  * Created by Administrator on 2017/4/15.
  */
 @Slf4j
@@ -33,15 +32,18 @@ public class BusHelper {
     @NoArgsConstructor
     @AllArgsConstructor
     static public class Message {
-        String topic, msg;
+        byte[] topic, msg;
     }
 
-    public void regSubscriber(ChannelHandlerContext channel, String topic) {
-        if (!subscribers.containsKey(topic)) {
-            subscribers.put(topic, new ArrayList<ChannelHandlerContext>());
+    public void regSubscriber(ChannelHandlerContext channel, byte[]... topic) {
+        for (byte[] t : topic) {
+            if (!subscribers.containsKey(new String(t))) {
+                subscribers.put(new String(t), new ArrayList<ChannelHandlerContext>());
+            }
+            subscribers.get(new String(t)).add(channel);
+            log.info("register subscriber {}", channel.channel().toString());
         }
-        subscribers.get(topic).add(channel);
-        log.info("register subscriber {}", channel.channel().toString());
+
     }
 
     public void pubMsg(Message m) {
@@ -55,11 +57,10 @@ public class BusHelper {
             while (true) {
                 try {
                     Message me = messages.take();
-                    String topic = me.getTopic();
-                    for (ChannelHandlerContext ch : subscribers.get(topic)) {
+                    byte[] topic = me.getTopic();
+                    for (ChannelHandlerContext ch : subscribers.get(new String(topic))) {
                         log.info("notify channel: {} ,msg: {}", ch.toString(), me.getMsg());
-                        ch.channel().write(new BulkReply(me.getMsg().getBytes()));
-                        ch.channel().flush();
+                        ch.channel().writeAndFlush(new BulkReply(me.getMsg()));
                     }
                 } catch (Exception e) {
                     log.error("", e);
