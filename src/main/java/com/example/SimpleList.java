@@ -16,7 +16,7 @@ import java.nio.ByteBuffer;
  */
 @Component
 @Slf4j
-public class SimpleKV {
+public class SimpleList {
     DataMedia store;
     IndexHelper ih;
 

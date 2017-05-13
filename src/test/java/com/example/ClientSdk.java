@@ -1,6 +1,7 @@
-package com.example.sdk;
+package com.example;
 
 import com.example.messagebus.BusHelper;
+import com.example.sdk.SubcriberHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -9,44 +10,60 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslHandler;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import javax.net.ssl.SSLEngine;
+import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-@Component
+//@Component
 @Slf4j
 @Order(value = 2)
 public class ClientSdk {
-    @Autowired(required = false)
+    //    @Autowired(required = false)
     SubcriberHandler subcriberHandler;
 
     public void setSubcriberHandler(SubcriberHandler subcriberHandler) {
         this.subcriberHandler = subcriberHandler;
     }
 
-    @Value("${host:0.0.0.0}")
-    String host;
-    @Value("${port:16980}")
-    int port;
+    //    @Value("${host:0.0.0.0}")
+    String host = "0.0.0.0";
+    //    @Value("${port:16379}")
+    int port = 16379;
     EventLoopGroup workerGroup = new NioEventLoopGroup(8);
     Bootstrap client = new Bootstrap();
     Channel channel;
     AtomicLong seq = new AtomicLong(0);
 
+    public void shutDown() {
+        channel.close();
+        workerGroup.shutdownGracefully();
+
+    }
+
     //@PostConstruct
     public void init() throws Exception {
+        final SSLEngine engine = ContextSSLFactory.getSslContext2().createSSLEngine();
+        engine.setUseClientMode(true);
+//        final SslContext sslCtx = SslContextBuilder.forClient().keyManager(new File("cChat.cer"), new File("cChat.jks")).build();
+//        final SslContext sslCtx = SslContextBuilder.forClient()
+//                .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
         client.group(workerGroup).channel(NioSocketChannel.class).handler(new ChannelInitializer<SocketChannel>() {
             @Override
             protected void initChannel(SocketChannel socketChannel) throws Exception {
-                socketChannel.pipeline().addLast(new LineBasedFrameDecoder(1024))
+                socketChannel.pipeline().addLast(/*sslCtx.newHandler(socketChannel.alloc(), host, port)*/new SslHandler(engine)).addLast(new LineBasedFrameDecoder(1024))
                         .addLast("decoder", new StringDecoder())
                         .addLast("encoder", new StringEncoder(Charset.forName("utf8")))
                         .addLast(new ChannelInboundHandlerAdapter() {
@@ -71,7 +88,8 @@ public class ClientSdk {
                         });
             }
         });
-        channel = client.connect(host, port).sync().channel();
+        ChannelFuture future = client.connect(host, port).sync();
+        channel = future.channel();
     }
 
     public String set(String k, String v) {

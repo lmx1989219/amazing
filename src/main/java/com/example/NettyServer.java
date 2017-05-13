@@ -12,6 +12,10 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslHandler;
+import io.netty.handler.ssl.util.SelfSignedCertificate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -24,6 +28,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import java.io.File;
 import java.nio.charset.Charset;
 
 @Component
@@ -52,23 +59,30 @@ public class NettyServer implements ApplicationContextAware {
     BusHelper busHelper;
 
     @PostConstruct
-    public void start() throws InterruptedException {
+    public void start() throws Exception {
         logger.info("begin to start rpc server");
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup(ioThreadNum);
-
+        final SSLEngine engine = ContextSSLFactory.getSslContext().createSSLEngine();
+        engine.setUseClientMode(false) ;
+        //false为单向认证，true为双向认证
+        engine.setNeedClientAuth(true) ;
+//        final SslContext sslCtx = SslContextBuilder.forServer(new File("sChat.cer"), new File("sChat.jks")).build();
+//        SelfSignedCertificate ssc = new SelfSignedCertificate();
+//        final SslContext sslCtx = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey())
+//                .build();
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).option(ChannelOption.SO_BACKLOG, backlog)
                 .childOption(ChannelOption.SO_KEEPALIVE, true).childOption(ChannelOption.TCP_NODELAY, true)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
-                        socketChannel.pipeline().addLast(new LineBasedFrameDecoder(1024)).addLast("decoder", new StringDecoder())
+                        socketChannel.pipeline().addLast(/*sslCtx.newHandler(socketChannel.alloc())*/new SslHandler(engine)).addLast(new LineBasedFrameDecoder(1024)).addLast("decoder", new StringDecoder())
                                 .addLast("encoder", new StringEncoder(Charset.forName("utf8"))).addLast(new NettyServerHandler(simpleKV, busHelper));
                     }
                 });
 
-        channel = serverBootstrap.bind(host, port).sync().channel();
+        serverBootstrap.bind(host, port).channel();
 
         logger.info("NettyRPC server listening on port {}", port);
     }
