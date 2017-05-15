@@ -1,0 +1,43 @@
+ 一、证书准备
+
+     要使用ssl双向验证，就必须先要生成服务端和客户端的证书，并相互添加信任，具体流程如下(本人调试这个用例的时候，花了很多时间来验证证书是否正确，以及握手失败的原因，这里证书生成过程只要按流程走，本人能保证绝对没有问题)
+
+现在打开cmd，在哪个目录下打开，证书就会放在哪个目录下：
+
+第一步:   生成Netty服务端私钥和证书仓库命令
+
+ keytool -genkey -alias securechat -keysize 2048 -validity 365 -keyalg RSA -dname "CN=localhost" -keypass sNetty -storepass sNetty -keystore sChat.jks
+
+
+
+-keysize 2048 密钥长度2048位（这个长度的密钥目前可认为无法被暴力破解）
+-validity 365 证书有效期365天
+-keyalg RSA 使用RSA非对称加密算法
+-dname "CN=localhost" 设置Common Name为localhost
+-keypass sNetty密钥的访问密码为sNetty
+-storepass sNetty密钥库的访问密码为sNetty（其实这两个密码也可以设置一样，通常都设置一样，方便记）
+-keystore sChat.jks 指定生成的密钥库文件为sChata.jks
+第二步：生成Netty服务端自签名证书
+
+             keytool -export -alias securechat -keystore sChat.jks -storepass sNetty -file sChat.cer
+
+ 第三步：生成客户端的密钥对和证书仓库，用于将服务端的证书保存到客户端的授信证书仓库中
+
+    keytool -genkey -alias smcc -keysize 2048 -validity 365  -keyalg RSA -dname "CN=localhost" -keypass sNetty  -storepass sNetty -keystore cChat.jks
+第四步：将Netty服务端证书导入到客户端的证书仓库中
+
+keytool -import -trustcacerts -alias securechat -file sChat.cer -storepass sNetty -keystore cChat.jks
+
+如果你只做单向认证，则到此就可以结束了，如果是双响认证，则还需继续往下走
+
+第五步:生成客户端自签名证书
+
+  keytool -export -alias smcc -keystore cChat.jks -storepass sNetty -file cChat.cer
+
+最后一步:将客户端的自签名证书导入到服务端的信任证书仓库中：
+
+   keytool -import -trustcacerts -alias smcc -file cChat.cer -storepass sNetty -keystore sChat.jks
+
+
+
+到这里，证书就生成完毕了，我们就可以得到两个jks文件，一个是服务端的sChat.jks  ，一个是客户端的cChat.jks   ,这两个文件后面初始化sslCOntext的时候会用到

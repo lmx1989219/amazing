@@ -22,6 +22,7 @@ public class DemoApplicationTests {
             clientSdk.set("1001", "张无忌");
             clientSdk.get("1001");
             clientSdk.registSub("amazing");
+            Thread.sleep(1000);
             clientSdk.pub(BusHelper.Message.builder().topic("amazing").msg("hello world").build());
             Thread.sleep(2000);
         } catch (Exception e) {
